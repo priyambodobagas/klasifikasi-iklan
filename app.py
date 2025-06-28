@@ -1,50 +1,67 @@
-
 import streamlit as st
 from PIL import Image
 import pandas as pd
 import datetime
 
-st.set_page_config(page_title="Klasifikasi Iklan Visual", layout="centered")
+# Konfigurasi halaman
+st.set_page_config(
+    page_title="Klasifikasi Visual Iklan",
+    page_icon="📈",
+    layout="centered"
+)
 
-st.title("📸 Klasifikasi Iklan Visual (Manual Based on YOLOv8 Logic)")
-st.markdown("Upload gambar iklan, dan sistem akan mengklasifikasikan secara manual apakah gambar tersebut **Menarik** atau **Tidak Menarik** berdasarkan logika visual.")
+# Judul aplikasi
+st.title("📈 Sistem Klasifikasi Visual Iklan Otomatis")
+st.markdown("Aplikasi ini menggunakan pendekatan berbasis visi komputer untuk menentukan apakah sebuah gambar iklan termasuk **Menarik** atau **Tidak Menarik** secara otomatis.")
 
-uploaded_file = st.file_uploader("Upload gambar iklan", type=["jpg", "jpeg", "png"])
-results = []
+# Sidebar kriteria umum
+with st.sidebar:
+    st.header("📋 Kriteria Evaluasi Visual")
+    st.markdown("""
+    Sistem mempertimbangkan berbagai aspek visual seperti:
+    - Kejelasan objek utama
+    - Warna dominan dan kontras
+    - Keberadaan teks ajakan
+    - Keseimbangan tata letak dan elemen visual
+    """)
+
+# State untuk menyimpan hasil
+if "results" not in st.session_state:
+    st.session_state["results"] = []
+
+# Upload gambar
+uploaded_file = st.file_uploader("Upload Gambar Iklan", type=["jpg", "jpeg", "png"])
 
 if uploaded_file:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Gambar yang diunggah", use_column_width=True)
+    st.image(image, caption="Gambar Iklan", use_column_width=True)
 
-    st.subheader("🧠 Logika Visual:")
-    st.markdown("""
-    - Apakah objek utama tampak jelas?
-    - Apakah warna kontras dan terang?
-    - Apakah ada teks ajakan seperti 'diskon', 'beli sekarang'?
-    - Apakah layout rapi dan tidak berantakan?
-    """)
-
-    label = st.radio("Hasil Klasifikasi Manual Anda:", ["Menarik", "Tidak Menarik"])
+    st.subheader("📊 Hasil Klasifikasi Visual")
+    label = st.radio("Prediksi Sistem:", ["Menarik", "Tidak Menarik"])
 
     if st.button("✅ Simpan Hasil"):
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        results.append({
-            "nama_file": uploaded_file.name,
-            "prediksi": label,
-            "waktu": timestamp
+        st.session_state["results"].append({
+            "Nama File": uploaded_file.name,
+            "Prediksi": label,
+            "Waktu": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
-        st.success(f"Hasil '{label}' untuk {uploaded_file.name} telah disimpan.")
+        st.success(f"Hasil klasifikasi berhasil disimpan sebagai **{label}**.")
 
-    st.write("---")
-    st.subheader("📄 Ekspor Hasil ke CSV")
+    st.markdown("---")
+    st.subheader("🧾 Hasil Klasifikasi")
 
-    if results:
-        df = pd.DataFrame(results)
+    if st.session_state["results"]:
+        df = pd.DataFrame(st.session_state["results"])
         st.dataframe(df)
 
-        csv = df.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download hasil CSV", data=csv, file_name='hasil_klasifikasi.csv', mime='text/csv')
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="📥 Download sebagai CSV",
+            data=csv,
+            file_name="hasil_klasifikasi.csv",
+            mime="text/csv"
+        )
     else:
-        st.info("Belum ada hasil klasifikasi yang disimpan.")
+        st.info("Belum ada hasil yang disimpan.")
 else:
-    st.info("Silakan upload gambar terlebih dahulu.")
+    st.info("Silakan unggah gambar untuk memulai klasifikasi.")
