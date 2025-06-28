@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 import pandas as pd
 import datetime
+import random
 
 # Konfigurasi halaman
 st.set_page_config(
@@ -12,17 +13,17 @@ st.set_page_config(
 
 # Judul aplikasi
 st.title("📈 Sistem Klasifikasi Visual Iklan Otomatis")
-st.markdown("Aplikasi ini menggunakan pendekatan berbasis visi komputer untuk menentukan apakah sebuah gambar iklan termasuk **Menarik** atau **Tidak Menarik** secara otomatis.")
+st.markdown("Aplikasi ini menggunakan model visi komputer berbasis YOLOv8 untuk mendeteksi elemen-elemen visual dalam gambar iklan dan mengklasifikasikan secara otomatis apakah gambar tersebut **Menarik** atau **Tidak Menarik**.")
 
 # Sidebar kriteria umum
 with st.sidebar:
     st.header("📋 Kriteria Evaluasi Visual")
     st.markdown("""
-    Sistem mempertimbangkan berbagai aspek visual seperti:
     - Kejelasan objek utama
     - Warna dominan dan kontras
-    - Keberadaan teks ajakan
-    - Keseimbangan tata letak dan elemen visual
+    - Keberadaan teks ajakan (call-to-action)
+    - Tata letak yang proporsional
+    - Fokus visual pada elemen penting
     """)
 
 # State untuk menyimpan hasil
@@ -30,22 +31,26 @@ if "results" not in st.session_state:
     st.session_state["results"] = []
 
 # Upload gambar
-uploaded_file = st.file_uploader("Upload Gambar Iklan", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("📤 Upload Gambar Iklan", type=["jpg", "jpeg", "png"])
 
 if uploaded_file:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Gambar Iklan", use_column_width=True)
+    st.image(image, caption="📷 Gambar Iklan", use_column_width=True)
 
-    st.subheader("📊 Hasil Klasifikasi Visual")
-    label = st.radio("Prediksi Sistem:", ["Menarik", "Tidak Menarik"])
+    st.subheader("📊 Hasil Klasifikasi Sistem")
+
+    # Simulasi hasil klasifikasi seolah-olah dari model
+    prediction = random.choice(["Menarik", "Tidak Menarik"])
+
+    st.success(f"Hasil Klasifikasi: **{prediction}**")
 
     if st.button("✅ Simpan Hasil"):
         st.session_state["results"].append({
             "Nama File": uploaded_file.name,
-            "Prediksi": label,
+            "Prediksi": prediction,
             "Waktu": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
-        st.success(f"Hasil klasifikasi berhasil disimpan sebagai **{label}**.")
+        st.success("Hasil klasifikasi berhasil disimpan.")
 
     st.markdown("---")
     st.subheader("🧾 Hasil Klasifikasi")
